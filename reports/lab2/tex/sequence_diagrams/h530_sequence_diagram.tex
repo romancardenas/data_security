@@ -1,0 +1,14 @@
+\begin{tikzpicture}[scale=1.75]
+		\begin{umlseqdiag}
+			\tikzumlset{font=\footnotesize}
+			\umlobject[no ddots, fill=white]{A} 
+			\umlobject[no ddots, fill=white]{B} 
+			\umlobject[no ddots, fill=white]{s} 
+			\begin{umlcall}[op={$M_1=A,B,g^X,MAC_{sk(A,s)}$},return={$M_4=B,A,g^Y,MAC_{sk(A,s)},MAC_{g^{XY}}$}]{A}{B} 
+				\begin{umlcall}[op={$M_2=M_1,A,B,g^X,g^Y,MAC_{sk(B,s)}$}, return={$M_3=MAC_{sk(A,s)},B,A,MAC_{sk(B,s)}$}]{B}{s}
+				\end{umlcall}
+			\end{umlcall}
+			\begin{umlcall}[op={$\{|M|\}_{g^{XY}}$}]{A}{B} 
+			\end{umlcall}
+		\end{umlseqdiag}
+	\end{tikzpicture}

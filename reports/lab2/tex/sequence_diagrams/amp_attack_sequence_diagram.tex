@@ -1,0 +1,21 @@
+\begin{tikzpicture}[scale=1.2]
+	\begin{umlseqdiag}
+		\tikzumlset{font=\scriptsize}
+		\umlobject[no ddots, fill=white]{A}
+		\umlobject[no ddots, fill=white]{i}  
+		\umlobject[no ddots, fill=white]{B} 
+		\umlobject[no ddots, fill=white]{s}
+		\begin{umlcall}[op={$\{A,i,Req_1,K_1\}_{pk(i)}$},return={$\{|A,s,i,X,Req_1|\}_{K_1}$}]{A}{i}	
+			\begin{umlcall}[op={$\{A,B,Y,K_1\}_{pk(B)}$},return={$\{|A,s,B,ReqID_2,Y|\}_{K_1}$}]{i}{B}	
+			\end{umlcall}
+		\end{umlcall}
+		\begin{umlcall}[op={$\{\{A,s,i,X,Req_1\}_{inv(pk(A))}\}_{pk(s)}$},return={$\{\{A,s\}_{inv(pk(s))}\}_{pk(A)}$}]{A}{i}
+			\begin{umlcall}[op={$\{\{A,s,i,X,Req_1\}_{inv(pk(A))}\}_{pk(s)}$},return={$\{\{A,s\}_{inv(pk(s))}\}_{pk(A)}$}]{i}{s}
+			\end{umlcall}
+		\end{umlcall}
+		\begin{umlcall}[op={$\{|\{A,s\}_{inv(pk(s))}|\}_{K_1}$}]{A}{i} 
+		\end{umlcall}
+		\begin{umlcall}[op={$\{|\{A,s\}_{inv(pk(s))}|\}_{K_1}$},return={$\{|Req_2,Data|\}_{K_1}$}]{i}{B} 
+		\end{umlcall}
+	\end{umlseqdiag}
+\end{tikzpicture}

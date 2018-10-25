@@ -1,0 +1,27 @@
+Protocol: AMP
+
+Types: Agent A,s,B;
+       Number Request,ReqID,Data;
+       Symmetric_key K
+
+Knowledge: 
+       A: A,s,B,pk(s),pk(A),inv(pk(A)),pk(B);
+       s: A,s,pk(s),inv(pk(s)),pk(A);
+       B: s,B,pk(s),pk(B),inv(pk(B))
+       where B!=s
+Actions:
+
+A->B: {A,B,Request,K}pk(B) 
+B->A: {|A,s,B,ReqID,Request|}K
+
+A->s:  { {A,s,B,ReqID,Request}inv(pk(A)) }pk(s) 
+s->A:  { {A,s}inv(pk(s)) }pk(A)
+
+A->B: {|{A,s}inv(pk(s))|}K
+B->A: {|Request,Data|}K
+
+Goals:
+
+B authenticates A on Request
+A authenticates B on Data
+Data secret between B,A

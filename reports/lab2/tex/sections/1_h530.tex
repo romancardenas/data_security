@@ -1,0 +1,58 @@
+\subsection{Original H.530 protocol description}\label{subsec:h5301}
+The H.530 protocol tries to address the problem of the Diffie-Hellman communication protocol authentication. As described in \cite[p. 19]{sebmod2018}, without the authentication of half-keys, this protocol could lead to a \textit{man-in-the-middle} attack.
+In this exercise, the authentication is based on a third entity \textit{s}, which is trusted by Alice (\textit{A}) and Bob (\textit{B}). Both \textit{A} and \textit{B} share a secret key with the trusted source \textit{s}, so this last entity is in charge of signing \textit{A} and \textit{B} authenticity in order to ensure both parts that the other part is trustworthy.
+\begin{figure}[hb]
+	\centering	
+	\input{tex/sequence_diagrams/h530_sequence_diagram}
+	\caption{H.530 sequence diagram}
+	\label{fig:h530trace}
+\end{figure}
+\\
+As shown in \textit{Figure \ref{fig:h530trace}}, the protocol would be as follows:
+\begin{itemize}
+	\item First of all, Alice sends a message to Bob with her half-key. The message is signed so that the trustworthy entity can verify the author of that message as Alice.
+	\item Bob asks the trustworthy entity about the authenticity of the message. He also includes his half-key and signs the message so that the trustworthy entity can verify the author of this message as Bob.
+	\item If both signatures are correct, the trustworthy entity will respond Bob by sending a message in which it states that \textit{A} and \textit{B} are trustworthy. The message will be signed twice in order for both Alice and Bob to be able to verify the third party's verdict. 
+	\item Finally, when Bob verifies that Alice is trustworthy, he sends her a message with his half-key signed twice, one by the third party entity and the other by Bob himself, using the shared key $g^{XY}$.
+	\item If Alice can verify the authenticity of the message, she will be able to send a message to Bob secured by their recently created shared key $g^{XY}$.
+\end{itemize}
+\subsection{Original H.530 protocol analysis with OFMC and protocol redefinition}\label{subsec:h5302}
+As expected, OFMC \cite{sebmod2005} detects an attack, which trace can be found in \textit{Code 1}. This trace describes how a \textit{man-in-the-middle} attack could be done with this protocol:
+\begin{itemize}
+	\item	Alice shares her half-key, $g^{X_1}$ , with Bob. However, it is intercepted by an intruder.
+	\item	The intruder opens the \textbf{first} session with Bob, pretending that he/she is Alice and making up the half-key ($X_2$ is set to 1, so $g^{X_2}=g$) and Alice's signature.
+	\item	Bob asks the trustworthy entity to verify the malicious request, attaching to the message his half-key $g^{Y_1}$, but it is also intercepted by the intruder.
+	\item	The intruder now reproduces the original message from Alice and sends it to Bob by opening the \textbf{second} session.
+	\item	Bob asks again the trustworthy entity to verify this duplicated request, attaching to his message a new half-key, $g^{Y_2}$. The intruder forwards the message to the trustworthy entity and intercepts its response.
+	\item	The trustworthy entity confirms that both Alice and Bob can be trusted. However, it does not sign any half-key to be used: Bob does not know that the original key, $g^{X_1}$, is the one that should be trusted.
+\end{itemize}
+\textit{Figure \ref{fig:h530traceattack}} shows a sequence diagram that illustrates the attack.\\
+\begin{figure}[ht!]
+	\centering	
+	\input{tex/sequence_diagrams/h530_attack_sequence_diagram}
+	\caption{H.530 attack sequence diagram}
+	\label{fig:h530traceattack}
+\end{figure}
+In \textit{"h530-fix.AnB"}, this issue is solved by making the trustworthy entity to sign not only Alice and Bob's identity but also the half-key $g^{X}$ A have decided to use for this session. With this small change, the security threat disappears: OFMC does not detect any attack.\\
+A sequence diagram with the changes made to the protocol is shown in \textit{Figure \ref{fig:h530tracefix}}.
+\begin{figure}[ht!]
+	\centering	
+	\input{tex/sequence_diagrams/h530_fix_sequence_diagram}
+	\caption{H.530 sequence diagram (fixed)}
+	\label{fig:h530tracefix}
+\end{figure}
+\subsection{Fixed H.530 protocol with untrustworthy third party entity}\label{subsec:h5303}
+By doing that, we are saying that the trustworthy entity cannot be trusted anymore: we cannot determine that an identity verification from S is safe.
+As expected, once we have changed the entity and examined with OFMC, the simulator detects a potential attack, which steps are shown in \textit{Figure \ref{fig:h530traceS}}.
+\begin{figure}[ht!]
+	\centering	
+	\input{tex/sequence_diagrams/h530_fix_sequence_diagram_S}
+	\caption{H.530 attack sequence diagram (untrustworthy third party entity)}
+	\label{fig:h530traceS}
+\end{figure}
+\begin{itemize}
+	\item	Alice shares her half-key, $g^{X}$, with Bob. However, it is intercepted by an intruder.
+	\item	The intruder pretends to be Bob and the third party entity at the same time, sending to Alice a weak half-key $g^{Y=1}=g$. It reuses the signature provided by Alice in the first message and signs the message with their new insecure shared key $g^{XY}=g^X$, which could be simply extracted from Alice's original message. From the point of view of Alice, the message is legit, as it appears to be signed by the trustworthy entity and by Bob with their recently created shared key.
+	\item	Alice sends an encrypted message to the intruder, believing that the receiver is Bob. The intruder is able to decrypt the message and reads its content.
+\end{itemize}
+This attack trace shows that, if the trustworthy server can be substituted by a \textit{man-in-the-middle} attack, it would be possible for an attacker to open a private, secure session with Alice, pretending that it is Bob the one at the other side.

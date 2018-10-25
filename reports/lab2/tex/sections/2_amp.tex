@@ -1,0 +1,72 @@
+\subsection{AMP protocol description}\label{subsec:amp1}
+
+The AMP protocol establishes a shared key between Alice and Bob, allowing them to communicate in a secure way.\\
+\textit{Figure \ref{fig:amptrace}} shows the AMP protocol sequence diagram.
+\\
+\begin{figure}[hb!]
+	\centering	
+	\input{tex/sequence_diagrams/amp_sequence_diagram}
+	\caption{AMP sequence diagram}
+	\label{fig:amptrace}
+\end{figure}
+\begin{itemize}
+	\item Initially, Alice knows Bob's public key. However, Bob does not know Alice's.
+	\item Alice sends a request to Bob. In this request, Alice attaches a request number and her desired shared key. The message is encrypted using Bob's public key, so only Bob is able to decrypt it.
+	\item Bob responds to Alice with a message containing a request identification number for Alice's request. He also includes the trustworthy third party entity in charge of verifying Alice's identity. This third party is also trusted by Alice, so she will also be able to verify Bob's identity.\\
+		The message is encrypted using the key shared by Alice and Bob, so only Alice is able to read it.
+	\item Alice sends a message which contains Alice's and Bob's identity to the third party entity. The message also includes the request number (created at the very beginning by Alice) and the request identification number (created by Bob).\\
+		This message is firstly signed by Alice using her secret key, which ensures that Alice and only Alice was the author of the message. Finally, the message is encrypted using the trustworthy entity's public key, ensuring that only this entity is able to read its content.
+	\item The third party responds to Alice with a message in which Alice is said to be trustful. The message is signed using the entity's private key, ensuring that it was the one that created the message. It is also encrypted using Alice's public key, so only Alice is able to read it.
+	\item Alice re-sends to Bob the message that the trustworthy entity has signed, encrypted this time with their new shared key. Now, Bob can check that the trustworthy entity verifies Alice's identity, so he can start sending data to Alice using their brand new shared key.
+\end{itemize}
+
+\subsection{AMP protocol analysis with OFMC}\label{subsec:amp2}
+
+Inspecting the protocol by using OFMC, a possible attack is found.\\
+A sequence diagram of the detected attack is shown in \textit{Figure \ref{fig:amptraceattack}}.
+\begin{figure}[ht!]
+	\centering	
+	\input{tex/sequence_diagrams/amp_attack_sequence_diagram}
+	\caption{AMP attack sequence diagram}
+	\label{fig:amptraceattack}
+\end{figure}
+\begin{itemize}
+	\item Alice sends a request to the intruder. In the request, it can be found the shared key Alice wants to use.
+	\item The intruder sends a request to Bob, pretending that he/she is Alice. The shared key proposed by the intruder for the secure channel is the same Alice sent previously to the intruder.
+	\item Bob sends to the intruder the trustworthy entity's address.
+	\item The intruder sends the third party entity's address to Alice.
+	\item Alice tries to establish a session with the third party, so it can verify Alice's identity. However, the session is intercepted by the intruder, who just forwards the message to the trustworthy entity.
+	\item The third party entity recognises Alice's signature, so it signs Alice authenticity and sends the signature back to the intruder. The intruder re-sends this message to Alice.
+	\item Alice sends to the intruder the signature of the trustworthy entity, this time encrypted by their shared key. As the intruder is able to decrypt the message, he/she has access to the trustworthy identity's signature.\\
+		The intruder re-sends this signature to Bob using their shared key.
+	\item As the trustworthy entity only signed that Alice can be trusted, and Bob believes that the intruder is Alice, he sends to the intruder confidential data.
+\end{itemize}
+This attack shows that not only can the intruder get confidential information from Bob, but also impersonate the identity of Alice.
+
+\subsection{AMP protocol fix}\label{subsec:amp3}
+
+This security threat can be easily fixed if the trustworthy third party entity signs not only that Alice can be trusted, but also the request number and the request ID under which Alice wants to establish a secure channel with Bob. \\
+In this way, the third party entity will sign that Alice can be trusted by Bob if and only if the request and request identification number coincide with certain values, previously negotiated between both Alice and Bob.\\
+\\
+\textit{Code \ref{lst:ampfix}} shows the \textit{AnB} source code for the fixed AMP protocol.\\
+After analysing this new protocol, OFDM did not find any threat for a maximum of two sessions.
+\\
+\input{tex/code/amp_fix}
+
+\subsection{Fixed AMP protocol with untrustworthy third party entity}\label{subsec:amp4}
+
+Again, if we consider that the third party entity is no longer trustworthy, as in \textit{Subsection \ref{subsec:h5303}}, OFMC detects a security threat, which sequence diagram is depicted in \textit{Figure \ref{fig:amptraceS}}.\\
+\begin{figure}[ht!]
+	\centering	
+	\input{tex/sequence_diagrams/amp_fix_sequence_diagram_S}
+	\caption{AMP attack sequence diagram (untrustworthy third party entity)}
+	\label{fig:amptraceS}
+\end{figure}
+In this case, the intruder is the third party entity itself.
+\begin{itemize}
+	\item The intruder starts a session with Bob and claims to be Alice wanting to establish a secure channel using the AMP protocol.
+	\item Bob responds to "\textit{Alice}" that she needs first to demonstrate her trustworthiness via the third party entity, which, in this case, is the intruder.
+	\item As expected, being the intruder the one that has to sign Alice's authenticity, it is very easy to him/her to cheat Bob, who thinks that it is Alice the one at the other side of the session.
+\end{itemize}
+After analysing the problem, and providing that Bob initially does not know anything about Alice, I could not find any way of avoiding this security threat.\\
+As previously said, Bob does not have Alice's public key, possibly because they have never established contact. For this reason, if the third party entity is not trustworthy, there is not any way of verifying Alice's identity.

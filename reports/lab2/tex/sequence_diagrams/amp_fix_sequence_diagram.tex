@@ -1,0 +1,14 @@
+\begin{tikzpicture}[scale=1.75]
+	\begin{umlseqdiag}
+		\tikzumlset{font=\footnotesize}
+		\umlobject[no ddots, fill=white]{A} 
+		\umlobject[no ddots, fill=white]{B} 
+		\umlobject[no ddots, fill=white]{s} 
+		\begin{umlcall}[op={$\{A,B,Req,K\}_{pk(B)}$},return={$\{|A,s,B,ReqID,Req|\}_{K}$}]{A}{B}	
+		\end{umlcall}
+ 		\begin{umlcall}[op={$\{\{A,s,B,ReqID,Req\}_{inv(pk(A))}\}_{pk(s)}$},return={$\{\{A,s,B,ReqID,Req\}_{inv(pk(s))}\}_{pk(A)}$}]{A}{s}
+		\end{umlcall}
+		\begin{umlcall}[op={$\{|\{A,s,B,ReqID,Req\}_{inv(pk(s))}|\}_K$},return={$\{|Req,Data|\}_{K}$}]{A}{B} 
+		\end{umlcall}
+	\end{umlseqdiag}
+\end{tikzpicture}

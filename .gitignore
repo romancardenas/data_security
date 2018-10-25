@@ -1,3 +1,4 @@
+## FOR JAVA PROJECTS
 # Compiled class file
 *.class
 
@@ -28,3 +29,35 @@ hs_err_pid*
 # IntelliJ stuff
 .idea
 *.iml
+
+## FOR LaTeX DOCUMENTS
+*.aux
+*.glo
+*.idx
+*.log
+*.toc
+*.ist
+*.acn
+*.acr
+*.alg
+*.bbl
+*.blg
+*.dvi
+*.glg
+*.gls
+*.ilg
+*.ind
+*.lof
+*.lot
+*.maf
+*.mtc
+*.mtc1
+*.out
+*.synctex.gz
+.texpadtmp/
+
+## LABORATORY SESSIONS SPECIFIC
+# Laboratory 2
+ofmc-2016/
+OFMC-tutorial.pdf
+set_enviroment.sh
