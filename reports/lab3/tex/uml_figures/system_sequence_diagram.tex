@@ -1,0 +1,23 @@
+\begin{tikzpicture}[scale=1.2]
+	\begin{umlseqdiag}
+		\tikzumlset{font=\scriptsize}
+		\umlactor[no ddots, fill=white]{client}
+		\umlobject[no ddots, fill=white]{print server}  
+		\umldatabase[no ddots, fill=white]{dbms} 
+		\begin{umlcall}[op={request,username,password}]{client}{print server}	
+			\begin{umlcall}[op={get(username)},return={salt, hash}]{print server}{dbms}	
+			\end{umlcall}
+			\begin{umlcall}[op={digest=SHA256(salt+password)}]{print server}{print server} 
+			\end{umlcall} 
+			\begin{umlfragment}[type=alt, label={digest==hash}, inner xsep=15] 
+				\begin{umlcall}[op={process request}]{print server}{print server} 
+				\end{umlcall} 
+				\begin{umlcall}[op={response}]{print server}{client} 
+				\end{umlcall} 
+				\umlfpart[digest!=hash] 
+				\begin{umlcall}[op={access denied}]{print server}{client} 
+				\end{umlcall} 
+			\end{umlfragment} 
+			\end{umlcall}
+	\end{umlseqdiag}
+\end{tikzpicture}

@@ -1,0 +1,39 @@
+\textit{Electronic authentication}, as defined in \cite[p. 1]{Burr2013}, is "the process of establishing confidence in user identities electronically presented to an information system". In the case of client/server applications, authentication addresses the mechanisms that a given server-based application needs to perform in order to identify all the incoming requests as requested by a given client and verify that this client has access or permission to use the requested resource.\\
+In password-based authentication systems, a user enters some identification, such as username, which can be available to the public as it does not provide the real protection. The protection system then requests a password from the user. If the password matches the one on file for the user, he/she is authenticated and access is allowed. Otherwise, the system does not grant access to the user.
+\subsection{Password storage}\label{subsec:pwdstore}
+The server must access to all clients' passwords, or at least modified information that makes possible for the server to match a password with a given user.\\
+At the same time, users demand that their passwords keep safe, ensuring that knowing the password is enough for authenticating a client. In this report, three password storage mechanisms are analysed.
+\subsubsection*{Passwords stored in a system file}\label{subsubsec:pwdstore1}
+In this scenario, the usernames and their respective passwords are stored in the server's local host. The operating system protection mechanisms are the ones in charge of keeping users' information safe.\\
+The only advantage of this solution is its simplicity: in order to verify a user's identity, the server has just to read a local file and check if the password matches with the one given by the client.\\
+However, several drawbacks lead us to reject this solution:
+\begin{itemize}
+	\item \textit{Entries order:} in the case of a system with a high number of users, the server will spend a lot of time just reading the file until it finds the entry that corresponds to the client that is currently requesting a service.
+	\item \textit{Sharing password storage mechanisms with other services:} As the file that gathers all the users' information is kept safe by the local host system, it will be impossible to share the password storage system with others servers unless they run on the same host.
+	\item \textit{Not enough secure:} the system administrator should be constantly checking if the current version of the OS is secure, and if not, update it to the latest version. Even if the system is rigorously updated, this does not reduce this security threat to zero.
+\end{itemize}
+\subsubsection*{Passwords stored in a public file with use of cryptography}\label{subsubsec:pwdstore2}
+This second scenario proposes that the file with all the users' information can be accessed by anyone. However, by using cryptography, all the content will be kept secure.\\
+With this system, security is achieved. However, as the storage is done in a file, performance issues are still there. Also, the file will only be readable for those processes able to decrypt it. In order for many servers to read this file and share the password management system, all the servers must know the secret key required for decrypting its content. A shared secret key is a potential security threat, as \textit{keeping the secret secret} becomes a difficult task.
+\subsubsection*{Password stored in a database management system}\label{subsubsec:pwdstore3}
+In this case, a database server stores all users information. The application server request only the necessary information for checking one client's authenticity.\\
+Communication between server and DBMS is assumed to be confidential by means of encryption, ensuring the solution's security.\\
+With this architecture, several servers can share the password storage system, they only need to be able to establish a secure channel with the DBMS.\\
+Finally, as information is stored in relational databases instead of files, the time required for verifying one user's authenticity will be lower in than previous cases.
+\subsection{Password transport}\label{subsec:pwdtrans}
+Two password transport scenarios are discussed: individual request authentication and authenticated sessions.
+\subsubsection*{Individual request authentication}\label{pwdtrans1}
+In this scenario the user authenticates his/her identity in each request: username and password should be sent \textbf{always}. This may be inconvenient, as there are more chances for network sniffers to get someone's password. However, as confidentiality is assumed between client and server, this should not be an issue to take into account for this laboratory session.
+\subsubsection*{Authenticated sessions}\label{pwdtrans2}
+With authenticated sessions, the user calls a specific method to authenticate his/her identity (login). If the user is authenticated, he/she receives a ticket that only he/she knows (which means that this new ticket also authenticates the user). After this, he/she will not send the password again, but the ticket.\\
+If the protocol used for login can ensure that the ticket is only known by a given user, the use of sessions can prevent the user for sending his/her password in the clear, reducing security threats.\\\\
+As confidentiality is supposed between client and server, this password transport is not taken into account for the service implementation.
+\subsection{Password verification}\label{subsec:pwdverif}
+Password verification is described for a scenario with an external DBMS for password storage mechanisms and individual request authentication.\\
+The DBMS will hold a table that gathers the username, salt and the hashed password for each user. Under no circumstances is recommended storing passwords in plain text; hashing them prevents authentication threats in case user information is leaked to the outside.The hashing method is as follows:
+\begin{itemize}
+	\item When introducing a new user with a given password, the server will compute a 20 byte-random string (salt). The salt is different for each user.
+	\item The salt is prepended to the user's chosen password and hashed.
+	\item The DBMS holds, for each user, the username, the salt and the hashed salt and password.
+\end{itemize}
+Clients include their username and password in each request. The server will ask the DBMS for the salt and hashed salt and password that belongs to the username provided in the request. After prepending the salt to the password sent by the client and hashing them, if the result coincides with the DBMS response, the server will conclude that the client is authenticated as the user, and process the request. Otherwise, the request will be rejected.

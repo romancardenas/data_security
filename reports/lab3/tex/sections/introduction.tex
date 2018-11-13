@@ -1,0 +1,16 @@
+This report addresses the problem of authentication in client/server applications.\\ \\
+The Authentication Laboratory addresses this problem by designing and implementing a simple password-based authentication mechanism for a print server application which must authenticate all requests from the client.
+The following assumptions were considered:
+\begin{itemize}
+	\item The issue of enrolment of users is not considered: authentication data structures were populated beforehand.
+	\item Secure communication between client and server is ensured by other means. Confidentiality and integrity are supposed to exist between clients and server. This assumption also applies to the communication between the server and the password storage entity.
+\end{itemize}
+The design and implementation of the print server considered the problems of password storage, password transport and password verification.
+\begin{itemize}
+	\item \textbf{Password storage:} Three different scenarios are discussed: passwords stored in a system file, passwords stored in a public file with use of cryptography and passwords stored in a database management system.
+	\item \textbf{Password transport:} both individual request authentication and session authenticated problems are discussed.
+	\item \textbf{Password verification:} taking into account the password storage strategy, a password verification method is chosen.
+\end{itemize}
+The proposed solution is based on individual request authentication. The password storage is on a database management system. Password is stored hashed in order to avoid security threads. The system uses the SHA-256 algorithm for digesting the passwords. It also uses salts to prevent from rainbow tables attacks in case of the users' information is leaked to the outside.
+
+The print server software has been proven to process clients request only if the request is successfully authenticated, as expected in the laboratory requirements.

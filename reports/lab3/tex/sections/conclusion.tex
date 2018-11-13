@@ -1,0 +1,15 @@
+\subsection{Summary}
+The objective of this laboratory session was to provide experience with the development of a user authentication mechanism. The proposed scenario was a client/server application for printing services. The developed system should authenticate every request to a system user, and execute the requested action only if the client was properly authenticated. Password storage, password transport and password verification were issues to be considered for the design.
+
+The proposed solution authenticated the users on each request (individual request authentication).\\
+Password storage was performed on a third entity: a database management system (DBMS). This design decision allowed different applications to use the same users' information.\\
+Passwords were not stored in clear but hashed using the SHA-256 algorithm. Salts were added to the passwords before hashing them in order to avoid rainbow table attacks.
+
+As demonstrated in \textit{Section \ref{sec:eval}}, the system succeeded authenticating requests, and they were processed only if the client was able to provide a valid username and password.
+\subsection{Future work}
+The following tasks were identified as possible future work for making the system more secure:
+\begin{itemize}
+	\item Encrypt communication between clients and server using Transport Layer Security (TLS).
+	\item Use of pepper (a secret application-wide random value appended to a password before hashing it) for securing even more users information.
+	\item Enable user enrolment.
+\end{itemize}

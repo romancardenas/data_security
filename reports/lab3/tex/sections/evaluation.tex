@@ -1,0 +1,82 @@
+The software developed for the print server prints logs on the output console different information regarding the print server functioning. By following these logs, it is easy to demonstrate that no request is processed before the user is successfully authenticated.
+\begin{lstlisting}[language=Java, caption={RMI function example}, label={lst:function}, basicstyle=\scriptsize]
+public String status(String username, String password) throws RemoteException{
+	System.out.println("REMOTE CALL: status");
+    if (user_authenticated(username, password)) {
+     	System.out.println("   Processing request");
+        return String.valueOf(this.status);
+    } else
+    	return "DENIED";
+    }
+\end{lstlisting}
+\textit{Code \ref{lst:function}} shows an example of how RMI functions are implemented. From this example, several aspects of the print server can be found:
+\begin{itemize}
+	\item Individual request authentication is required for requesting services.
+	\item The server first logs the name of the requested service.
+	\item The server only performs the expected service if \textit{user\_authenticated} returns \textit{true}.
+		Otherwise, the server responds to the request with a \textit{deny of service} message.
+\end{itemize}
+\begin{lstlisting}[language=Java, caption={user\_authenticated function}, label={lst:userauth}, basicstyle=\scriptsize]
+private boolean user_authenticated(String username, String password) {
+	System.out.println("   CHECKING USER AUTHENTICITY:");
+	boolean res = this.db.checkUserAuth(username, password);
+	if (res)
+		System.out.println("   User ".concat(username).concat( " authenticated"));
+	else
+		System.out.println("   User ".concat(username).concat( " NOT authenticated"));
+	return res;
+}
+\end{lstlisting}
+\textit{Code \ref{lst:userauth}} presents the \textit{user\_auth} function. It logs that authenticity is being checked and the final result. As shown in the third line, the result depends on the response of a DBMS request.
+\begin{lstlisting}[language=Java, caption={checkUserAuth function (simplified)}, label={lst:dbauth}, basicstyle=\scriptsize]
+public boolean checkUserAuth(String user, String password) {
+    boolean res = false;
+    String sql = "SELECT salt, password FROM users WHERE name = ?";
+    Connection conn=this.connect();
+    PreparedStatement pstmt =conn.prepareStatement(sql));
+    pstmt.setString(1, user);
+    ResultSet rs  = pstmt.executeQuery();
+    if (!rs.next()) {
+        System.out.println("      Username not found");
+    } else {
+        do {
+            String rcv_salt = rs.getString("salt");
+            String rcv_password = rs.getString("password");
+            String hashed_password = this.passwordToHash(password, rcv_salt);
+            System.out.println("   SALT: " + byteArrayToHex(rcv_salt.getBytes()));
+            System.out.println("   Hashed password: " + byteArrayToHex(hashed_password.getBytes()));
+            System.out.println("   Hash stored in DB: " + byteArrayToHex(rcv_password.getBytes()));
+            res = rcv_password.equals(hashed_password);
+        } while (rs.next());
+    }
+    return res;
+}
+\end{lstlisting}
+\textit{Code \ref{lst:dbauth}} shows a simplified version of the function that requests user information to the DBMS. \textit{Tries} and \textit{catches} were omitted for sake of clarity. The function gets from the DBMS the salt and hashed password of a given username, prepends the salt with the password given by the client and hashes them, and checks that the result coincides with the hash stored in the DBMS. It also logs all the intermediate steps.
+\begin{lstlisting}[caption={Server logs}, label={lst:logs}, basicstyle=\scriptsize]
+REMOTE CALL: print
+   CHECKING USER AUTHENTICITY:
+      Username: user1
+      Password: user1
+      SALT: efbfbd340fefbfbd6fefbfbd55efbfbd72efbfbd1a31cfbcefbfbd75efbfbd7b78efbfbd
+      Hashed password: efbfbdd391efbfbdefbfbdefbfbd645a1a36efbfbde6b6a213dfba442befb...
+      Hash stored in DB: efbfbdd391efbfbdefbfbdefbfbd645a1a36efbfbde6b6a213dfba442befb...
+      User user1 authenticated
+   PROCESSING REQUEST
+REMOTE CALL: print
+   CHECKING USER AUTHENTICITY:
+      Username: user1
+      Password: user0
+      SALT: efbfbd340fefbfbd6fefbfbd55efbfbd72efbfbd1a31cfbcefbfbd75efbfbd7b78efbfbd
+      Hashed password: efbfbd6823304c7852efbfbd3d3771480644efbfbd79efbfbd11efbfbd027...
+      Hash stored in DB: efbfbdd391efbfbdefbfbdefbfbd645a1a36efbfbde6b6a213dfba442befb...
+      User user1 NOT authenticated
+REMOTE CALL: print
+   CHECKING USER AUTHENTICITY:
+      Username: user0
+      Password: user0
+      Username not found
+   User user0 NOT authenticated
+\end{lstlisting}
+\textit{Code \ref{lst:logs}} contains three log traces with different results: the first one shows a successful authentication. On the second one, username and password provided by the user do not match with data gathered in the DBMS. The last trace shows a case in which the username is not even present in the DBMS.\\
+Note that, as expected, only in the first trace the server logs that the request is being processed.

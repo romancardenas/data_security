@@ -1,0 +1,80 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%                    REQUIRED PACKAGES FOR DOCUMENT                    %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[12pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage[square,sort,comma,numbers]{natbib}
+\usepackage{url}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\graphicspath{{images/}}
+\usepackage{parskip}
+\usepackage{fancyhdr}
+\usepackage{vmargin}
+\usepackage{xcolor}		
+\usepackage{listings}									% For inserting code
+\usepackage{sty/tikz-uml}  								% For UML diagrams
+								
+% Listing -> Code
+\renewcommand{\lstlistingname}{Code}
+% List of Listings -> List of Codes
+\renewcommand{\lstlistlistingname}{List of \lstlistingname s}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%                       DOCUMENT SETUPS (AESTHETIC)                    %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{Laboratory 2: Authentication}					% Title
+\author{Román Cárdenas}									% Author
+\date{\today}											% Date
+
+% Make title etc. accessible from any part of the document
+\makeatletter
+\let\thetitle\@title
+\let\theauthor\@author
+\let\thedate\@date
+\setlength{\@fptop}{0pt}
+\makeatother
+
+% Set margins
+\setmarginsrb{3 cm}{2.5 cm}{3 cm}{2.5 cm}{1 cm}{1.5 cm}{1 cm}{1.5 cm}
+
+% Set header
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\theauthor}
+\lhead{\thetitle}
+\cfoot{\thepage}
+
+% For non-numbered lists to use dashes (-)
+\renewcommand{\labelitemi}{\textendash}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%                            DOCUMENT STARTS                           %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+\begin{document}
+\input{tex/dtu_report_titlepage.tex}
+\tableofcontents
+\listoffigures
+% \listoftables
+\lstlistoflistings
+\pagebreak
+\section{Introduction}\label{sec:intro}
+	\input{tex/sections/introduction}
+	\pagebreak
+\section{Authentication}\label{sec:auth}
+	\input{tex/sections/authentication}
+	\pagebreak
+\section{Design and Implementation}\label{sec:design}
+	\input{tex/sections/design_and_implementation}
+	\pagebreak
+\section{Evaluation}\label{sec:eval}
+	\input{tex/sections/evaluation}
+	\pagebreak
+\section{Conclusion}\label{sec:conc}
+	\input{tex/sections/conclusion}	
+	\pagebreak
+\clearpage
+\bibliographystyle{ieeetr}								%IEEE citation style
+\nocite{*}						  % Show non-cited resources in bibliography
+\bibliography{biblist}
+\end{document}
